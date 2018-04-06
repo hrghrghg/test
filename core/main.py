@@ -1,4 +1,5 @@
 import sys,os
+from core import auth
 
 user_data = {
     "account_id":None,
@@ -26,7 +27,7 @@ def printbill():
 
 def run():
     print(menu)
-
+    auth.acc_login(user_data,"test")
 menu = u'''
 ------- Alex huang Bank ---------
 \033[32;1m1.  账户信息

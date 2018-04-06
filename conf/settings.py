@@ -1,4 +1,9 @@
 import sys,os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
+
+DATABASE = {
+    'engine': 'file', #support mysql,postgresql in the future
+    'name':'accounts',
+    'path': "%s/db" % BASE_DIR
+}
