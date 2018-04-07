@@ -8,9 +8,9 @@ user_data = {
 }
 
 
-def select():
-    pass
-def add():
+def select(acc_data):
+    print(acc_data)
+def add(acc_data):
     pass
 def remove():
     pass
@@ -61,7 +61,7 @@ def interactive(acc_data):
         print(menu)
         choise = input(">>>:").strip()
         if choise in menu_dic:
-            print('jing lai le')
+            menu_dic[choise](acc_data)
         else:
             print("\033[31;1m此选择不存在\033[0m")
 
