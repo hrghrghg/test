@@ -7,3 +7,9 @@ DATABASE = {
     'name':'accounts',
     'path': "%s/db" % BASE_DIR
 }
+
+TANSACTION_TYPE = {
+    'withdraw':{'action':'minus','interest':0.05},
+    'repay':{'action':'plus','interest':0},
+    'transfer':{'action':'minus','interest':0.05}
+}

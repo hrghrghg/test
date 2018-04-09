@@ -1,6 +1,8 @@
 import sys,os
 from core import auth
-
+from core import account
+from core import manager
+from core import transaction
 user_data = {
     "account_id":None,
     "is_authenticated":False,
@@ -8,21 +10,63 @@ user_data = {
 }
 
 
-def select(acc_data):
-    print(acc_data)
-def add(acc_data):
-    pass
-def remove():
-    pass
-def transfer():
-    pass
-def withdraw():
-    pass
-def repay():
-    pass
-def frozen():
-    pass
-def printbill():
+def credit_info(acc_data):
+    print(account.load_account_data(acc_data['account_id']))
+def transfer(acc_data):
+    acc_data = account.load_account_data(acc_data['account_id'])
+    exit_flag = False
+    while not exit_flag:
+        acc_data = account.load_account_data(acc_data['id'])
+        curr_info = '''------------ Alex Bank ------------
+        Credit:%s
+        Balance:%s''' % (acc_data['id'], acc_data['balance'])
+        print("\033[33;1m%s\033[0m" %curr_info)
+        to_credit = input("\033[34;1m对方账号>>:\033[0m")
+        amount = input("\033[34;1m转账金额>>:\033[0m").strip()
+        to_acc_data = account.load_account_data(to_credit)
+        if len(amount) > 0 and amount.isnumeric():
+            amount = float(amount)
+            ack = transaction.transaction(acc_data,'transfer',amount)
+            ack2 = transaction.transaction(to_acc_data,'repay',amount)
+            if ack == "True" and ack2 == "True":
+                print("transfer success")
+        if amount == "b":
+            exit_flag = True
+def withdraw(acc_data):
+    acc_data = account.load_account_data(acc_data['account_id'])
+    exit_flag = False
+    while not exit_flag:
+        acc_data = account.load_account_data(acc_data['id'])
+        curr_info = '''------------ Alex Bank ------------
+        Credit:%s
+        Balance:%s''' % (acc_data['id'], acc_data['balance'])
+        print("\033[33;1m%s\033[0m" %curr_info)
+        amount = input("\033[34;1m>>:\033[0m").strip()
+        if len(amount) > 0 and amount.isnumeric():
+            amount = float(amount)
+            ack = transaction.transaction(acc_data,'withdraw',amount)
+            if ack == "True":
+                print("transfer success")
+        if amount == "b":
+            exit_flag = True
+def repay(acc_data):
+    acc_data = account.load_account_data(acc_data['account_id'])
+    exit_flag = False
+    while not exit_flag:
+        acc_data = account.load_account_data(acc_data['id'])
+        curr_info = '''------------ Alex Bank ------------
+        Credit:%s
+        Balance:%s''' % (acc_data['id'], acc_data['balance'])
+        print("\033[33;1m%s\033[0m" %curr_info)
+        amount = input("\033[34;1m>>:\033[0m").strip()
+        if len(amount) > 0 and amount.isdigit():
+            amount = float(amount)
+            ack = transaction.transaction(acc_data,'repay',amount)
+            if ack == "True":
+                print("repay success")
+        if amount == "b":
+            exit_flag = True
+def showbill():
     pass
 
 def run():
@@ -38,23 +82,21 @@ def interactive(acc_data):
     menu = u'''
     ------- Alex huang Bank ---------
     \033[32;1m1.  账户信息
-    2.  添加账户
-    3.  注销账户
-    4.  转账
-    5.  提现
-    6.  冻结解冻
-    7.  返款
-    8.  打印账单
+    2.  转账
+    3.  提现
+    4.  返款
+    5.  打印账单
+    6.  管理界面
+    7.  退出
     \033[0m'''
     menu_dic = {
-        "1":select,
-        "2":add,
-        "3":remove,
-        "4":transfer,
-        "5":withdraw,
-        "6":frozen,
-        "7":repay,
-        "8":printbill
+        "1":credit_info,
+        "2":transfer,
+        "3":withdraw,
+        "4":repay,
+        "5":showbill,
+        "6":manager.manager,
+        "7":exit
     }
     exit_flag = False
     while not exit_flag:
