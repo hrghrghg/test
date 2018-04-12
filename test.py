@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!_*_coding:utf8_*_
 # author aliex-hrg
-import hmac
-
-m = hmac.new(b'aaaa',b'fdsafd')
-
-print(m.hexdigest())
+import re,os
+import sys
+if 3.243214e-6 > 2 :
+    print("ok")
