@@ -3,5 +3,6 @@
 # author aliex-hrg
 import re,os
 import sys
-if 3.243214e-6 > 2 :
-    print("ok")
+
+
+print(eval("(60-30 +(-40/5) * (9-2*5/3 + 7 /3*99/4*2998 +10 * 568/14 ))"))
