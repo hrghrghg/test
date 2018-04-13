@@ -1,27 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # author aliex-hrg
-import logging
-from logging import handlers
+import re
 
-logger = logging.getLogger('access')
-logger.setLevel(logging.DEBUG)
+a = "-1388337.0476190478--1.2"
+k = "[\+\-]"
+#k = "([\+\-])*%s" % k
+aparttern = "\ ?(\d+\.)?\d+\ ?%s\ ?(\d+\.)?\d+(\ ?%s\ ?(\d+\.)?\d+)*" % (k, k)
+parttern = "^[\+\-]\d+\.\d+"
+r1 = re.search(parttern,a)
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s')
 
-#sf = logging.FileHandler('test.log',encoding='utf8')
-sf = logging.handlers.RotatingFileHandler('test.log',maxBytes=8,backupCount=3,encoding='utf8')
-sf.setLevel(logging.ERROR)
-sf.setFormatter(formatter)
-
-ss = logging.StreamHandler()
-ss.setFormatter(formatter)
-
-logger.addHandler(sf)
-logger.addHandler(ss)
-
-logger.debug('debug')
-logger.info('info')
-logger.warning('warning')
-logger.error('error')
-logger.critical('critical')
+print(r1.group())
