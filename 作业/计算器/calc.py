@@ -4,28 +4,70 @@
 import re
 expr='1 - 2 * ( (60-30 +(-40/5) * (9-2*5/3 + 7 /3*99/4*2998 +10 * 568/14 )) - (-4*3)/ (16-3*2) )'
 expr = expr.replace(' ','')
-def calc(string,k):
+def calc2(expr):
+    '''
+    传来一个最简单的二元表达式，换算成具体的加减乘除
+    :param expr:
+    :return:
+    '''
+    pattern2 = '([\+\-]?\d+(\.\d+)*)'
+    r3 = [i for i in re.split(pattern2,expr) if i and i[0] != "."]
+    print(r3)
+    if len(r3) == 2:
+        symbol = '+'
+        num1 = float(r3[0])
+        num2 = float(r3[1])
+    else:
+        symbol = r3[1]
+        num1 = float(r3[0])
+        num2 = float(r3[2])
+    if symbol == '+':
+        res = num1 + num2
+    elif symbol == '-':
+        res = num1 - num2
+    elif symbol == '*':
+        res = num1 * num2
+    else:
+        res = num1 / num2
+    return res
+def calc(string):
     '''
     这是一元或二元计算不含括号，从左到右算，最后替换原内容
     :param string: 原表达式最内侧的括号内容
     :param k: 为一元只算加减，二元只算*/
     :return: 返回计算结果
     '''
-    k = "([\+\-])*%s([\+\-])*" %k   #加减*/前后可能有多个加减
-    parttern = "[\*\/\+\-]*(\d+\.)?\d+%s(\d+\.)?\d+(%s(\d+\.)?\d+)*" % (k, k)  #匹配类似内容-12.0102+-2.432+12
+    parttern1 = '[\+\-]?\d+(\.\d+)*[\*\/][\+\-]?\d+(\.\d+)*' #匹配乘除
+    parttern2 = '[\+\-]?\d+(\.\d+)*[\+\-][\+\-]?\d+(\.\d+)*' #匹配加减
     lag = False
     #print('key:',string)
     while not lag:
-        if re.search(parttern,string) is not None:
-            r1 = re.search(parttern,string)
-            eval1 = eval(r1.group())
-            temp = '+' + str(eval1)
-            string = re.sub(parttern,temp,string,count=1)
-            #print(string)
+        if re.search(parttern1,string) is not None:
+            r1 = re.search(parttern1,string)
+            print(r1.group())
+            eval1 = calc2(r1.group())
+            if eval1 > 0:
+                temp = '+' + str(eval1)
+            else:
+                temp = str(eval1)
+            string = re.sub(parttern1,temp,string,count=1)
+            print(string)
         else:
-            lag = True
-            #print('return-key:',string)
-            return string.strip('+')
+            while not lag:
+                if re.search(parttern2,string) is not None:
+                    r2 = re.search(parttern2,string)
+                    print(r2.group())
+                    eval2 = calc2(r2.group())
+                    if eval2 > 0:
+                        temp = '+' + str(eval2)
+                    else:
+                        temp = str(eval2)
+                    string = re.sub(parttern2,temp,string,count=1)
+                    print(string)
+                else:
+                    lag = True
+                    #print('return-key:',string)
+    return string.strip('+')
 
 def parentheses(str1):
     '''
@@ -40,14 +82,13 @@ def parentheses(str1):
         if re.search(parttern1,str1) is not None:
             r1 = re.search(parttern1,str1)
             step1 = r1.group().strip("()")
-            step2 = calc(step1,"[\*\/]")
-            step3 = calc(step2,'[\+\-]')
-            str1 = re.sub(parttern1,step3,str1,count=1)
+            step2 = calc(step1)
+            str1 = re.sub(parttern1,step2,str1,count=1)
         else:
             lag = True
-            step4 = calc(str1,"[\*\/]")
-            step5 = calc(step4, '[\+\-]')
-            return step5
+            step3 = calc(str1)
+            step4 = calc(step3)
+            return step4
 
 print('自己算的结果:',parentheses(expr))
 
