@@ -11,8 +11,7 @@ def calc2(expr):
     :return:
     '''
     pattern2 = '([\+\-]?\d+(\.\d+)*)'
-    r3 = [i for i in re.split(pattern2,expr) if i and i[0] != "."]
-    print(r3)
+    r3 = [i for i in re.split(pattern2,expr) if i and i[0] != "."] #此步很关键，切片时带小数的要排除
     if len(r3) == 2:
         symbol = '+'
         num1 = float(r3[0])
@@ -32,38 +31,33 @@ def calc2(expr):
     return res
 def calc(string):
     '''
-    这是一元或二元计算不含括号，从左到右算，最后替换原内容
+    这是计算不含括号的表达式，先算*/再算+-，从左到右算，最后替换原内容
     :param string: 原表达式最内侧的括号内容
-    :param k: 为一元只算加减，二元只算*/
     :return: 返回计算结果
     '''
     parttern1 = '[\+\-]?\d+(\.\d+)*[\*\/][\+\-]?\d+(\.\d+)*' #匹配乘除
     parttern2 = '[\+\-]?\d+(\.\d+)*[\+\-][\+\-]?\d+(\.\d+)*' #匹配加减
     lag = False
     #print('key:',string)
-    while not lag:
+    while not lag:  #计算乘除循环
         if re.search(parttern1,string) is not None:
             r1 = re.search(parttern1,string)
-            print(r1.group())
             eval1 = calc2(r1.group())
-            if eval1 > 0:
+            if eval1 > 0:   #如果计算结果是负数自然带操作符，是正数得手动赋值加操作符
                 temp = '+' + str(eval1)
             else:
                 temp = str(eval1)
             string = re.sub(parttern1,temp,string,count=1)
-            print(string)
         else:
-            while not lag:
+            while not lag:   #计算加减循环
                 if re.search(parttern2,string) is not None:
                     r2 = re.search(parttern2,string)
-                    print(r2.group())
                     eval2 = calc2(r2.group())
                     if eval2 > 0:
                         temp = '+' + str(eval2)
                     else:
                         temp = str(eval2)
                     string = re.sub(parttern2,temp,string,count=1)
-                    print(string)
                 else:
                     lag = True
                     #print('return-key:',string)
