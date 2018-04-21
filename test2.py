@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # author aliex-hrg
-import re
+import hashlib
+import time
+def create_md5():
+    m = hashlib.md5()
+    m.update(bytes(str(time.time()),encoding='utf8'))
+    return m.hexdigest()
 
-#expr='-1 - 2 * ( (60-30 +(-40/5) * (9-2*5/3 + 7 /3*99/4*2998 +10 * 568/14 )) - (-4*3)/ (16-3*2) )'
-expr = '-10.23243/-3.432'
-pattern1 = '([\+\-]?\d+(\.\d+)*)'
-l = [i for i in re.split('([\+\-]?\d+(\.\d+)?)',expr) if i and i[0] != "."]
-print(l)
+
+
+
+print(create_md5())
+print(time.time())
