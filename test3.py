@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 # author aliex-hrg
 
-import test2
+import os
+a = "get ls"
 
-print(test2.create_md5())
+c,d = a.split()
+print(c)
+print(d)
+print(os.stat('server.py').st_size)
