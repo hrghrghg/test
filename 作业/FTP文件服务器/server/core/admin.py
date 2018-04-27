@@ -24,13 +24,13 @@ def login(user,passwd):
             data = json.load(f)
             if passwd == data['passwd']:
                 print('\033[31;1mlogin success\033[0m')
-                return True
+                return 0
             else:
                 print("\033[31;1mpassword error\033[0m")
-                return False
+                return 1
     else:
         print("\033[31;1muser not exist\033[0m")
-        return False
+        return 2
 menu = '''---------user admin-------
     1. add user
     2. del user
