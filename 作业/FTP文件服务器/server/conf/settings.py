@@ -8,6 +8,6 @@ sys.path.append(BASE_DIR)
 
 servername = "localhost"
 port = 6969
-HOME_DIR = os.path.join('D:\\ftp')
+HOME_DIR = 'D:\\ftp'
 
 

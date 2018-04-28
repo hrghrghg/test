@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # author aliex-hrg
+c = "k"
+m = {}
+m["s"] = 1
+m["b"] = 2
+m[c] = 3
 
-import os
-a = "get ls"
 
-c,d = a.split()
-print(c)
-print(d)
-print(os.stat('server.py').st_size)
+
+print(len(m))

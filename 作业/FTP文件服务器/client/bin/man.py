@@ -15,18 +15,15 @@ if __name__ == '__main__':
         print("\033[33;1m-------------login page-------------\033[0m")
         username = input("username:").strip()
         password = input("password:").strip()
-        cmd_info = {
-            "cmd":"login",
-            "username":username,
-            "password":password
-        }
+        cmd_info = {"cmd":"login","par1":username,"par2":password}
         conn = socket.socket()
-        conn.connect((settings.servername,settings.port))
-        conn.send(json.dumps(cmd_info).encode())
-        recv_data = conn.recv(8096)
+        conn.connect((settings.servername,settings.port))    #建立socket连接
+        conn.send(json.dumps(cmd_info).encode())            #发送用户登录数据
+        recv_data = conn.recv(8096)             #接收登录返回结果
         if recv_data.decode() == "0":
             print("login success")
-            interactive.interactive()
+            interactive.interactive(conn,username)       #登录成功，进入交互界面,传递socket对象和用户名
+            attempt = 3
         elif recv_data.decode() == "1":
             print("password error")
         else:
