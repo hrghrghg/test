@@ -7,3 +7,4 @@ sys.path.append(BASE_DIR)
 
 servername = "localhost"
 port = 6969
+HOME_DIR = 'D:\\ftp'
