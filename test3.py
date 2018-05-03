@@ -3,5 +3,5 @@
 # author aliex-hrg
 import sys,os,time
 
-with open('1','wb') as f:
-    f.write(b"11111")
+a = os.stat('d:\\ftp\\2\\2.mp4').st_size
+print(a)

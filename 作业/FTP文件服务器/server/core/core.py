@@ -11,6 +11,7 @@ import admin
 class MyTCPHandler(socketserver.BaseRequestHandler):
     ftp_dir = settings.HOME_DIR     #定义FTP服务器根目录
     curr_dir = None     #定义用户当前目录
+    size_limit = 0
     def ls(self,info):
         print('bug:',self.curr_dir)
         if not info.get('par1'):
@@ -50,9 +51,22 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             login_status = admin.login(username, password)
             if login_status == 0:
                 self.curr_dir = '%s\%s' % (self.ftp_dir, username)
+                with open(os.path.join(BASE_DIR,'conf',username+'.json'),'r',encoding='utf-8') as f:
+                    self.size_limit = json.load(f)['limit']
+                print('capacity:',self.limit_check(self.curr_dir))
             return str(login_status)
         else:
             return 3
+
+    def limit_check(self,path):
+        sum_size = 0
+        for f in path:
+            if os.path.isfile(f):
+                sum_size += os.stat(f).st_size
+            # elif os.path.isdir(f):
+            #     f1 = os.path.abspath(f)
+            #     sum_size += self.limit_check(f1)
+        return sum_size
     def get(self,info):
         if info.get('par1'):
             file_path = "%s\%s" %(self.curr_dir,info['par1'])
@@ -96,15 +110,21 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             self.request.sendall(b"0")
         filenum = 0
         m = hashlib.md5()
-        with open(file_path+'.tmp','wb') as f:
+        with open(file_path+'.tmp','ab') as f:
             while filenum != filesize:
                 data = self.request.recv(8096)
                 f.write(data)
                 filenum += len(data)
                 m.update(data)
-
-        print(m.hexdigest())
-        os.rename(file_path+'.tmp',file_path)
+        self.request.send(b"ack")  #解决粘包
+        recv_md5 = self.request.recv(8096).decode()
+        if recv_md5 == m.hexdigest():
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            os.rename(file_path+'.tmp',file_path)
+        else:
+            print('file transfer error')
+            return "md5 error"
         return "file upload success"
     def handle(self):
         try:
