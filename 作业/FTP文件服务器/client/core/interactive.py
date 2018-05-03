@@ -4,6 +4,62 @@ import json,hashlib
 import sys,os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
+def to_get(conn,info_dict):
+    if not info_dict.get('par1'): return "miss parameter"
+    filesize = int(conn.recv(1024).decode())
+    if filesize != 0:
+        m = hashlib.md5()
+        filenum = 0
+        print(filesize)
+        if os.path.isfile(info_dict['par1']+'.tmp'):
+            has_size = os.stat(info_dict['par1']+'.tmp').st_size
+            conn.send(str(has_size).encode())  # 消除粘包并传送已经接收文件大小
+            filesize -= has_size
+        else:
+            conn.send(b'0')
+        with open(info_dict['par1'] + '.tmp', 'wb') as f:
+            while filenum != filesize:
+                data = conn.recv(8096)
+                f.write(data)
+                m.update(data)
+                filenum += len(data)
+                # print('sum:', filenum, 'curr:', len(data))
+                percent = int(100 * filenum / filesize)
+                show_str = "[%-100s] %s%%" % (percent * '#', percent)
+                print('\r%s' % show_str, file=sys.stdout, flush=True, end='')
+        conn.send(b"ack")  # 消除粘包
+        recv_md5 = conn.recv(1024)
+        conn.send(b"ack")  # 消除粘包
+        if recv_md5.decode() == m.hexdigest():
+            os.rename(info_dict['par1'] + '.tmp',info_dict['par1'])
+        else:
+            print("file transfer error")
+
+def to_put(conn,info_dict):
+    if not info_dict.get('par1'):return "miss parameters"
+    file_path = info_dict['par1']
+    m = hashlib.md5()
+    conn.recv(1024) # 消除粘包
+    if os.path.isfile(file_path):
+        filesize = os.stat(file_path).st_size
+        conn.sendall(str(filesize).encode())  #发送文件大小
+        has_size = conn.recv(1024).decode()   #接收已下载大小
+        filenum = 0
+        with open(file_path,'rb') as f:
+            if has_size != "0":  #断点续传
+                f.seek(int(has_size))
+            for line in f:   #传送文件
+                conn.sendall(line)
+                filenum += len(line)
+                m.update(line)
+                percent = int(100 * filenum / filesize)
+                show_str = "[%-100s] %s%%" % (percent * '#', percent)
+                print('\r%s' % show_str, file=sys.stdout, flush=True, end='')
+        print(m.hexdigest())
+    else:
+        print("file does not exist")
+        conn.sendall(b'0')  #发送文件大小为0，叫服务器关闭
+        return "file does not exist"
 
 def help():
     msg = '''-------- Support following command --------
@@ -28,31 +84,10 @@ def interactive(conn,username):
         print('cmd',info_dict)
         conn.send(json.dumps(info_dict).encode())   #将执行命令json化发送给服务器
         if info_dict["cmd"] == "get":
+            to_get(conn,info_dict)
+        if info_dict["cmd"] == "put":
+            to_put(conn,info_dict)
 
-            filesize = int(conn.recv(1024).decode())
-            if filesize != 0:
-                m = hashlib.md5()
-                filenum = 0
-                progress = 0
-                print(filesize)
-                conn.send(b"ack")  #消除粘包
-                if info_dict.get('par1'):
-                    with open(info_dict['par1'],'wb') as f:
-                        while filenum != filesize:
-                            data = conn.recv(8096)
-                            f.write(data)
-                            filenum += len(data)
-                            modulus = (len(data)+progress)//(filesize/100)  #把一次读取到的大小按文件总大小除100取模，并打印模个点
-                            if modulus >= 1.0:progress = 0    #如果模为0，累计到下次，直到模为1，并清除累计值
-                            progress = (len(data)+progress)%(filesize/100)    #余数 累计值
-                            for i in range(int(modulus)):    #for打印一次模的点数
-                                sys.stdout.write('.')
-                                sys.stdout.flush()
-                            percent = int(100*filenum/filesize)
-                            show_str = "[%-100s] %s%%" %(percent*'#',percent)
-                            print('\r%s' %show_str,file=sys.stdout,flush=True,end='')
-                            # print("{:.2f}%".format(filenum/filesize*100))
-                            # print('sum:',filenum,'curr:',len(data))
 
         re_data = conn.recv(8096).decode()
-        print(re_data)
+        print('finally result:',re_data)

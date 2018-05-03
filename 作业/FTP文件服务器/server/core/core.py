@@ -60,13 +60,18 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 filesize = os.stat(file_path).st_size
                 m = hashlib.md5()
                 self.request.sendall(str(filesize).encode())  #发送文件大小
-                self.request.recv(1024)  #消除粘包
-
+                has_size = self.request.recv(1024).decode()  #接收已传大小和消除粘包
+                print('has_size:',has_size)
                 with open(file_path,'rb') as f:
+                    if has_size != '0':
+                        f.seek(int(has_size))   #如果已经传送了一些，则从后面继续传送
                     for line in f:
                         self.request.send(line)
                         m.update(line)
+                self.request.recv(1024)  #消除粘包
                 file_md5 = m.hexdigest()
+                self.request.sendall(file_md5.encode())
+                self.request.recv(1024)  # 消除粘包
                 return "download success"
             else:
                 self.request.send(b'0')
@@ -76,6 +81,31 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             self.request.send(b'0')
             print("miss a request parameters")
             return "miss a request parameters"
+    def put(self,info):
+        if not info.get('par1'):return "miss request parameters"
+        file_path = os.path.join(self.curr_dir,info['par1'])
+        self.request.sendall(b"ack")  #解决粘包
+        filesize = int(self.request.recv(8096).decode())
+        print("filesize:",filesize)
+        if filesize == 0:return "file does not exist,because filesize is zero"  #解决客户端提交一个不存在的文件
+        if os.path.isfile(file_path+'.tmp'):   #实现断点续传
+            has_size = os.stat(file_path+'.tmp').st_size
+            self.request.sendall(str(has_size).encode())
+            filesize -= has_size
+        else:
+            self.request.sendall(b"0")
+        filenum = 0
+        m = hashlib.md5()
+        with open(file_path+'.tmp','wb') as f:
+            while filenum != filesize:
+                data = self.request.recv(8096)
+                f.write(data)
+                filenum += len(data)
+                m.update(data)
+
+        print(m.hexdigest())
+        os.rename(file_path+'.tmp',file_path)
+        return "file upload success"
     def handle(self):
         try:
             while True:
