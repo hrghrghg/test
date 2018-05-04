@@ -41,9 +41,13 @@ def to_put(conn,info_dict):
     if not info_dict.get('par1'):return "miss parameters"
     file_path = info_dict['par1']
     m = hashlib.md5()
-    conn.recv(1024) # 消除粘包
+    rest = int(conn.recv(1024).decode()) # 接收硬盘剩余空间
     if os.path.isfile(file_path):
         filesize = os.stat(file_path).st_size
+        if rest - filesize < 0:
+            print("lack of available disk space,the rest of disk space:%s" %rest)
+            conn.sendall(b'0')  # 发送文件大小为0，叫服务器关闭
+            return "lack of available disk space"
         conn.sendall(str(filesize).encode())  #发送文件大小
         has_size = conn.recv(1024).decode()   #接收已下载大小
         print(type(has_size),has_size)

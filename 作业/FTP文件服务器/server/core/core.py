@@ -6,7 +6,7 @@ import sys,os,socketserver,json,hashlib
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from conf import settings
-import admin
+import admin,re
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     ftp_dir = settings.HOME_DIR     #定义FTP服务器根目录
@@ -30,17 +30,26 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             pwd_dir.append('\\')
         return pwd_dir[0]
 
+    def dir_strip(self,path):
+        path = path.rstrip('\\')
+        while '\\..' in path:
+            path = re.sub('\\\\?[^\\\\]*\\\\\.\.', '', path,count=1)
+        if '\\.' in path:
+            path = path.replace('\\.', '')
+        return path
+
     def cd(self,info):
         username = info['user']
-        exist_dir = os.popen("dir %s" %self.curr_dir).read()
         if not info.get('par1'):
             self.curr_dir = '%s\%s' % (self.ftp_dir, username)
             print('curr_dir',self.curr_dir)
             return self.curr_dir
         else:
             path_dir = info["par1"]
-            if path_dir in exist_dir:
-                self.curr_dir = '%s\%s' % (self.curr_dir,path_dir)
+            curr_dir = '%s\%s' % (self.curr_dir, path_dir)
+            curr_dir = self.dir_strip(curr_dir)
+            if os.path.isdir(os.path.join(curr_dir)):   #如果目录存在则把当前目录赋予全局变量
+                self.curr_dir = curr_dir
                 return self.curr_dir
             else:
                 return "this directory is not exist"
@@ -53,20 +62,22 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 self.curr_dir = '%s\%s' % (self.ftp_dir, username)
                 with open(os.path.join(BASE_DIR,'conf',username+'.json'),'r',encoding='utf-8') as f:
                     self.size_limit = json.load(f)['limit']
-                print('capacity:',self.limit_check(self.curr_dir))
+                print('used space:',self.limit_check(self.curr_dir))
             return str(login_status)
         else:
             return 3
 
     def limit_check(self,path):
+        pathlist = os.listdir(path)
         sum_size = 0
-        for f in path:
-            if os.path.isfile(f):
-                sum_size += os.stat(f).st_size
-            # elif os.path.isdir(f):
-            #     f1 = os.path.abspath(f)
-            #     sum_size += self.limit_check(f1)
+        for f in pathlist:
+            f_path = os.path.join(path,f)
+            if os.path.isfile(f_path):
+                sum_size += os.stat(f_path).st_size
+            elif os.path.isdir(f_path):
+                sum_size += self.limit_check(f_path)
         return sum_size
+
     def get(self,info):
         if info.get('par1'):
             file_path = "%s\%s" %(self.curr_dir,info['par1'])
@@ -98,7 +109,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def put(self,info):
         if not info.get('par1'):return "miss request parameters"
         file_path = os.path.join(self.curr_dir,info['par1'])
-        self.request.sendall(b"ack")  #解决粘包
+        rest = int(self.size_limit*1024*1024 - self.limit_check(self.curr_dir))
+        self.request.sendall(str(rest).encode())  #发送磁盘剩余空间
         filesize = int(self.request.recv(8096).decode())
         print("filesize:",filesize)
         if filesize == 0:return "file does not exist,because filesize is zero"  #解决客户端提交一个不存在的文件
