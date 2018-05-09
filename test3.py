@@ -3,10 +3,8 @@
 # author aliex-hrg
 import sys,os,time,re
 
+import getpass
 
+password = getpass.getpass()
 
-
-c = "D:\\ftp\\.\\.\\..\\12\\13\\.."
-print(re.sub('(\\\\\.)+\\\\\.\.','\\..',c,count=1))
-#print(re.sub('\\\\\.[^\.]','',c))
-print(c)
+print(password)

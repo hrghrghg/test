@@ -138,6 +138,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print('file transfer error')
             return "md5 error"
         return "file upload success"
+
+
+
     def handle(self):
         try:
             while True:
