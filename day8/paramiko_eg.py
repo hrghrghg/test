@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author aliex-hrg
+
+import paramiko
+from io import StringIO
+
+key_str = '''-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEA1v/Cy/1A6aUvP49THyvfYSYPPw+KAE1RwoyN1EHy2Ul1XZl2
+bI09D/2STZfsY+pCLSoubmcPhe8TTuroTBEfMnMEG7Qw1uJnBDqSdmN25jc9WG2E
+yEkY+dPCFkg966AEuJS8bpObmkeiMWH4vS4N4m1RIxcwnUrct0Nn5m8qnXdpCMGK
+ViHpPrjzBYUHfzNjzHk7Po6uDOseVuw57T8wdw/uxSCurrHtkjTbznBU3I4kv0tG
+jZhqCA0fboXHdwakX2uS02f85V5z/xTSvsr00tblZvJpSp/nnR29okFWjTrEtIz+
+HB8FMOTiUleYbp5Qrw3X7PJVmmSK6HpuNj0crQIDAQABAoIBAHWF+QVoukL9eIZV
+4in34XNJSqw94kGoAjlGe4C7S/Raoz021fUgf3BuO7sOgLldJC9sD1VqIKIlvXg2
+ECUEdvksxeIe7VOJDqbRHZ55YFUXfQEJXLveuThW+JEVjENwhSQgqaAIL9Z1scMs
+ursuoYhUGTYFRx2z/lJvFixwN+s6iiOAUExsrbpz/maDR0AEdHT5Ea30EdQzif/Q
+co5EGNV0g0OY8XDysjFkWC1I8lBf135tdWcDJS5Ud5e45AJPd/hr19gGYE6k06ju
+LIH4UFiiLl7zdzfWwXhebv1t5Qu2wKODarGPtprTTXg+QLuvNShHELXSUDNFIaK/
+20ilXkECgYEA8gpFwhntMF+7Nprmu4Tx+5woBGE8W+X7iIHpR8nB/4QsU1b2UeAg
+zyxoSZMsaHJRf2fTHNk7GXUBy3oAEbZ3fsHGMv/HsY/qkEjzbRd7tVoaOgPdFBSV
+1c6lN5ZZG1BhT9plJYfJj7hogBtFvNb1RO+9tpuNOgDh9HEa+WoDfo8CgYEA42Y6
+AunKbkXEgR1t1YBJ80TqYMakTUp0zOseQWIZGIbcHOp6BOzzbQg5lIGwUU7H2hAz
+wxzOplEAxELW62kREwlwNLGuTFOzcbvVjY5ZhY2kfo8XAPp7/y0HKc5qjr/LiI8f
+K1Lb3ExlOnUvaCfW44/GohVYt2aXlzXY5VvTzwMCgYAAtnkIHk1thAqoGYKucLDJ
+veb8RFEKMD4yY7eNJ5Hzr671u97T1OYj1gykktNhp1yIFIUxo44iAA82SzCu3Kuz
+atyrj8dFxZe6PwzAeH47xX0oSJShF4Jtc8NWy5GNnAn9UzZTCvhT/QYJworNCJEG
+V/JmFEUxM4l2z9J1g5NpDwKBgE0elDn8s8xmGNh49JDdqza3fo1HkN0tjSMZ8e7W
+qBArXGbqFmupOH0Xtv9oZDWO9DQ+Hm/jSyoYepwU1vKLdWDxaH5Wa/gywr6lpy0U
+w8OJX+oT+Qc56+eEi9Nfz7+NyCcN8tIsjafOuN30dBlsuXH/hqvddXLtdiev+Vj/
+pXulAoGAKM4L134ZKa8GRyJ+8l48Qn2XEjuWq/QWS6+FvKhqkLLiFQhRNGBKAxeV
+QSWSg/JfA1Nzvp5usM1+JIBh2+W3Qn1THJZEWBULHj2xUDhmG8e6Kdy1VpWcj0sn
+ShbMOCp5tEvMBhVnFGBBniqALVEaUy2j9dG53kBxVyABJh3DdaI=
+-----END RSA PRIVATE KEY-----'''
+private_str = paramiko.RSAKey(file_obj=StringIO(key_str))
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('192.168.80.200',22,'root',pkey=private_str)
+stdin,stdout,stderr = ssh.exec_command('echo $PATH')
+print(stdout.read().decode())
