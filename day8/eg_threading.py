@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 # author aliex-hrg
 import threading,time
+
 star_time = time.time()
 def run1(n,k):
     print(n)
@@ -22,14 +23,25 @@ class MyThread(threading.Thread):
     def run(self):      #这里函数名必须是叫run
         print("run in thread...",self.n, )
         time.sleep(2)
+
+lock = threading.Lock()
+def run():
+    lock.acquire()
+    global num
+    num += 1
+    time.sleep(1)
+    lock.release()
+
 my_obj = []
-for i in range(4):
-    name = MyThread(i);
-    name.setDaemon(True)
-    name.start()
-    my_obj.append(name)
+num = 0
+for i in range(5):
+    t = threading.Thread(target=run)
+    t.start()
+    my_obj.append(t)
+
+for j in my_obj:
+    j.join()
 
 
+print('sum',num)
 
-print('-----main threading------')
-print("cost:",time.time() - star_time)

@@ -4,6 +4,8 @@
 
 import socket
 sock = socket.socket()
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 #sock.connect(('120.78.197.182',51102))
 sock.connect(('localhost',6969))
 flag = False
