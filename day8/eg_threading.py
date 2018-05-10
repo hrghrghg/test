@@ -20,7 +20,7 @@ class MyThread(threading.Thread):
         super(MyThread,self).__init__()
         self.n = n
     def run(self):      #这里函数名必须是叫run
-        print("run in thread...",self.n,threading.active_count())
+        print("run in thread...",self.n, )
         time.sleep(2)
 my_obj = []
 for i in range(4):
