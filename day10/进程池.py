@@ -5,7 +5,7 @@
 from multiprocessing import Process,Pool
 import time,os
 def bar(arg):
-    print(arg[0],arg[1])  #返回的是元组参数
+    #print(arg[0],arg[1])  #返回的是元组参数
     print("process done...",arg,os.getpid())  #进程ID跟主进程 一样
 def f(i):
     time.sleep(2)
