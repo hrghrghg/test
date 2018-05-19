@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 # author aliex-hrg
-import socket,os,hashlib
-
+import socket,hashlib,os
 sock = socket.socket()
 sock.bind(('localhost',6969))
 sock.listen()
@@ -11,6 +10,9 @@ conn,addr = sock.accept()
 while True:
     data = conn.recv(8096).decode()
     print('recv:',data)
+    resp = data.upper()
+    conn.send(resp.encode())
+
     m = hashlib.md5()
     cmd,filename = data.split()
     if os.path.isfile(filename):

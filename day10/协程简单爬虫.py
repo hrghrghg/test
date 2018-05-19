@@ -1,14 +1,14 @@
 #!_*_coding:utf-8_*_
 #__author__:"Alex huang"
+from gevent import monkey
+monkey.patch_all()    #这是给urllib打补丁，使其io操作能被gevent捕获，但一定要导入urllib前加入这行
 import gevent,time
 from urllib import request
-from gevent import monkey
-monkey.patch_all()
 def url(url):
     print("GET:%s" %url)
     resp = request.urlopen(url)
     data = resp.read()
-    # with open('url.html','wb') as f:
+    # with open(url.lstrip('https://'),'wb') as f:
     #     f.write(data)
     print('%d bytes received from %s.' %(len(data),url))
 
